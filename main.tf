@@ -186,6 +186,10 @@ resource "aws_security_group" "lb_sg" {
     protocol = "tcp"
   }
 
+  tags = {
+    Name = "tf-prod-lb-sg"
+  }
+
 }
 
 
