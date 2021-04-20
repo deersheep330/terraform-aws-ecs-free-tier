@@ -65,25 +65,25 @@ resource "aws_network_acl" "public_subnet_network_acl" {
   // set from_port = 0 and to_port = 0
   // to allow all ports
 
-  ingress = [ {
+  ingress {
     action = "allow"
     cidr_block = "0.0.0.0/0"
     protocol = "-1"
     from_port = 0
     to_port = 0
     rule_no = 100
-  } ]
+  }
 
   // the (*)DENY ALL rule is added automatically
 
-  egress = [ {
+  egress {
     action = "allow"
     cidr_block = "0.0.0.0/0"
     protocol = "-1"
     from_port = 0
     to_port = 0
     rule_no = 100
-  } ]
+  }
 
   // the (*)DENY ALL rule is added automatically
 
@@ -104,24 +104,26 @@ resource "aws_security_group" "ecs_sg" {
 
   vpc_id = aws_vpc.vpc.id
 
-  ingress = [ {
+  ingress {
     cidr_blocks = [ "0.0.0.0/0" ]
     from_port = 80
     to_port = 80
     protocol = "tcp"
-  }, {
+  }
+  
+  ingress {
     cidr_blocks = [ "0.0.0.0/0" ]
     from_port = 22
     to_port = 22
     protocol = "tcp"
-  } ]
+  }
 
-  egress = [ {
+  egress {
     cidr_blocks = [ "0.0.0.0/0" ]
     from_port = 0
     to_port = 0
     protocol = "-1"
-  } ]
+  }
 
   tags = {
     Name = "tf-prod-ecs-sg"
@@ -133,25 +135,32 @@ resource "aws_security_group" "rds_sg" {
 
   vpc_id = aws_vpc.vpc.id
 
-  ingress = [ {
+  ingress {
     cidr_blocks = [ "0.0.0.0/0" ]
     description = "for debug only, login mysql from local machine, should be removed later"
     from_port = 3306
     to_port = 3306
     protocol = "tcp"
-  } ]
+  }
+  
+  ingress {
+    cidr_blocks = [ aws_vpc.vpc.cidr_block ]
+    description = "only allow traffic from this vpc"
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+  }
 
-  egress = [ {
-    cidr_blocks = [ "value" ]
-    description = "value"
-    from_port = 1
-    ipv6_cidr_blocks = [ "value" ]
-    prefix_list_ids = [ "value" ]
-    protocol = "value"
-    security_groups = [ "value" ]
-    self = false
-    to_port = 1
-  } ]
+  egress {
+    cidr_blocks = [ "0.0.0.0/0" ]
+    from_port = 0
+    to_port = 0
+    protocol = "tcp"
+  }
+
+  tags = {
+    Name = "tf-prod-rds-sg"
+  }
 
 }
 
@@ -159,29 +168,23 @@ resource "aws_security_group" "lb_sg" {
 
   vpc_id = aws_vpc.vpc.id
 
-  ingress = [ {
-    cidr_blocks = [ "value" ]
-    description = "value"
-    from_port = 1
-    ipv6_cidr_blocks = [ "value" ]
-    prefix_list_ids = [ "value" ]
-    protocol = "value"
-    security_groups = [ "value" ]
-    self = false
-    to_port = 1
-  } ]
+  // should add 443 for https
 
-  egress = [ {
-    cidr_blocks = [ "value" ]
-    description = "value"
-    from_port = 1
-    ipv6_cidr_blocks = [ "value" ]
-    prefix_list_ids = [ "value" ]
-    protocol = "value"
-    security_groups = [ "value" ]
-    self = false
-    to_port = 1
-  } ]
+  ingress {
+    cidr_blocks = [ "0.0.0.0/0" ]
+    description = "only allow incoming packets for port 80"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+  }
+
+  egress {
+    cidr_blocks = [ "0.0.0.0/0" ]
+    description = "allow all outcoming packets"
+    from_port = 0
+    to_port = 0
+    protocol = "tcp"
+  }
 
 }
 
