@@ -201,7 +201,24 @@ resource "aws_security_group" "lb_sg" {
   }
 
 }
+/*
+resource "aws_instance" "ec2_instance" {
 
+  subnet_id = aws_subnet.public_subnet.id
+
+  ami = "ami-09f644e1caad2d877"
+  instance_type = "t2.micro"
+  associate_public_ip_address = true
+  vpc_security_group_ids = [ aws_security_group.ecs_sg.id ]
+
+  user_data = "value"
+
+  tags = {
+    Name = "tf-prod-ec2-instance"
+  }
+
+}
+*/
 
 
 
