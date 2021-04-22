@@ -143,9 +143,19 @@ resource "aws_security_group" "rds_sg" {
     protocol = "tcp"
   }
   
+  /*
   ingress {
     cidr_blocks = [ aws_vpc.vpc.cidr_block ]
     description = "only allow traffic from this vpc"
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+  }
+  */
+
+  ingress {
+    security_groups = [ aws_security_group.ecs_sg.id ]
+    description = "only allow traffic from instances belong to ecs security group"
     from_port = 3306
     to_port = 3306
     protocol = "tcp"
