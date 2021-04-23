@@ -201,21 +201,28 @@ resource "aws_security_group" "lb_sg" {
   }
 
 }
+
+// database-related
+
+resource "aws_db_subnet_group" "db_subnet_group" {
+  subnet_ids = [ aws_subnet.public_subnet.id ]
+}
+
 /*
-resource "aws_instance" "ec2_instance" {
+resource "aws_db_instance" "rds" {
 
-  subnet_id = aws_subnet.public_subnet.id
+  allocated_storage = 10
+  engine = "mysql"
+  engine_version = "8.0.20"
+  instance_class = "db.t2.micro"
+  name = "mydb" # db name
+  username = "root"
+  password = "adminadmin"
 
-  ami = "ami-09f644e1caad2d877"
-  instance_type = "t2.micro"
-  associate_public_ip_address = true
-  vpc_security_group_ids = [ aws_security_group.ecs_sg.id ]
+  publicly_accessible = true
 
-  user_data = "value"
-
-  tags = {
-    Name = "tf-prod-ec2-instance"
-  }
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.id
+  vpc_security_group_ids = [ aws_security_group.rds_sg.id ]
 
 }
 */
