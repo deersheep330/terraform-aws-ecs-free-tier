@@ -227,7 +227,61 @@ resource "aws_db_instance" "rds" {
 }
 */
 
+// autoscaling & ec2 intances
 
+// step 1: create iam role
 
+data "aws_iam_policy_document" "ecs_iam_policy_document" {
+  statement {
+    actions = [ "sts:AssumeRole" ]
+    principals {
+      type = "Service"
+      identifiers = [ "ec2.amazonaws.com" ]
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_iam_role" {
+  name = "ecs_iam_role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_iam_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment" {
+  role = aws_iam_role.ecs_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+// Use an instance profile to pass an IAM role to an EC2 instance.
+
+resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
+  name = "ecs_iam_instance_profile"
+  role = aws_iam_role.ecs_iam_role.name
+}
+
+// step 2: create autoscaling group
+
+resource "aws_launch_configuration" "ecs_launch_configuration" {
+  name = "ecs_launch_configuration"
+  image_id = "ami-09f644e1caad2d877"
+  instance_type = "t2.micro"
+  iam_instance_profile = aws_iam_instance_profile.ecs_iam_instance_profile.id
+
+  security_groups = [ aws_security_group.ecs_sg.id ]
+  associate_public_ip_address = true
+  user_data = <<EOF
+              #!/bin/bash
+              echo ECS_CLUSTER=var.ecs_cluster_name >> /etc/ecs/ecs.config
+              EOF
+}
+
+resource "aws_autoscaling_group" "ecs_autoscaling_group" {
+  name = "ecs_autoscaling_group"
+  vpc_zone_identifier = [ aws_subnet.public_subnet.id ]
+  launch_configuration = aws_launch_configuration.ecs_launch_configuration.name
+
+  desired_capacity = 1
+  min_size = 1
+  max_size = 1
+}
 
 
