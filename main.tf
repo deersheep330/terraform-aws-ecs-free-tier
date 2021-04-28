@@ -256,6 +256,11 @@ resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment" {
 resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
   name = "ecs_iam_instance_profile"
   role = aws_iam_role.ecs_iam_role.name
+  // waiting for others
+  // https://stackoverflow.com/questions/36802681/terraform-having-timing-issues-launching-ec2-instance-with-instance-profile
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
 }
 
 // step 2: create autoscaling group
