@@ -266,7 +266,7 @@ data "aws_iam_policy_document" "ecs_iam_policy_document" {
 }
 
 resource "aws_iam_role" "ecs_iam_role" {
-  name = "ecs_iam_role"
+  name = "tf-prod-ecs-iam-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_iam_policy_document.json
 }
 
@@ -278,7 +278,7 @@ resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment" {
 // Use an instance profile to pass an IAM role to an EC2 instance.
 
 resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
-  name = "ecs_iam_instance_profile"
+  name = "tf-prod-ecs-iam-instance-profile"
   role = aws_iam_role.ecs_iam_role.name
   // waiting for others
   // https://stackoverflow.com/questions/36802681/terraform-having-timing-issues-launching-ec2-instance-with-instance-profile
@@ -290,7 +290,7 @@ resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
 // step 2: create autoscaling group
 
 resource "aws_launch_configuration" "ecs_launch_configuration" {
-  name_prefix = "tf-prod-ec2-"
+  name = "tf-prod-ecs-launch-configuration"
   image_id = "ami-09f644e1caad2d877"
   instance_type = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.ecs_iam_instance_profile.id
@@ -303,20 +303,32 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   associate_public_ip_address = true
   user_data = <<EOF
               #!/bin/bash
-              echo ECS_CLUSTER=var.ecs_cluster_name >> /etc/ecs/ecs.config
+              echo ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config
               EOF
 
   key_name = "automation-aws"
 }
 
 resource "aws_autoscaling_group" "ecs_autoscaling_group" {
-  name = "ecs_autoscaling_group"
+  name = "tf-prod-ecs-autoscaling-group"
   vpc_zone_identifier = [ aws_subnet.public_subnet.id ]
   launch_configuration = aws_launch_configuration.ecs_launch_configuration.name
 
   desired_capacity = 1
   min_size = 1
   max_size = 1
+
+  tag {
+    key = "Name"
+    value = "tf-prod-autoscaled-ec2"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key = "Name"
+    value = "tf-prod-ecs-autoscaling-group"
+    propagate_at_launch = false
+  }
 }
 
 
