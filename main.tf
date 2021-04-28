@@ -220,10 +220,16 @@ resource "aws_security_group" "lb_sg" {
 // database-related
 
 resource "aws_db_subnet_group" "db_subnet_group" {
+  name = "tf-prod-db-subnet-group"
   subnet_ids = [ aws_subnet.public_subnet.id, aws_subnet.public_subnet_2.id ]
+  tags = {
+    Name = "tf-prod-db-subnet-group"
+  }
 }
 
 resource "aws_db_instance" "rds" {
+
+  identifier = "tf-prod-rds"
 
   allocated_storage = 10
   engine = "mysql"
@@ -234,6 +240,7 @@ resource "aws_db_instance" "rds" {
   password = "adminadmin"
 
   publicly_accessible = true
+  skip_final_snapshot = true
 
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.id
   vpc_security_group_ids = [ aws_security_group.rds_sg.id ]
@@ -283,10 +290,14 @@ resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
 // step 2: create autoscaling group
 
 resource "aws_launch_configuration" "ecs_launch_configuration" {
-  name = "ecs_launch_configuration"
+  name_prefix = "tf-prod-ec2-"
   image_id = "ami-09f644e1caad2d877"
   instance_type = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.ecs_iam_instance_profile.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   security_groups = [ aws_security_group.ecs_sg.id ]
   associate_public_ip_address = true
@@ -294,6 +305,8 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
               #!/bin/bash
               echo ECS_CLUSTER=var.ecs_cluster_name >> /etc/ecs/ecs.config
               EOF
+
+  key_name = "automation-aws"
 }
 
 resource "aws_autoscaling_group" "ecs_autoscaling_group" {
