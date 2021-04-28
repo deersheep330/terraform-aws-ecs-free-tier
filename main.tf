@@ -49,8 +49,23 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_subnet" "public_subnet" {
   vpc_id = aws_vpc.vpc.id
   cidr_block = "10.0.1.0/24"
+  availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf-prod-public-subnet"
+  }
+}
+
+// for aws_db_subnet_group, we have to create at least two subnets
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = data.aws_availability_zones.available.names[1]
+  tags = {
+    Name = "tf-prod-public-subnet-2"
   }
 }
 
@@ -205,10 +220,9 @@ resource "aws_security_group" "lb_sg" {
 // database-related
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  subnet_ids = [ aws_subnet.public_subnet.id ]
+  subnet_ids = [ aws_subnet.public_subnet.id, aws_subnet.public_subnet_2.id ]
 }
 
-/*
 resource "aws_db_instance" "rds" {
 
   allocated_storage = 10
@@ -224,8 +238,11 @@ resource "aws_db_instance" "rds" {
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.id
   vpc_security_group_ids = [ aws_security_group.rds_sg.id ]
 
+  tags = {
+    Name = "tf-prod-rds"
+  }
+
 }
-*/
 
 // autoscaling & ec2 intances
 
@@ -256,6 +273,11 @@ resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment" {
 resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
   name = "ecs_iam_instance_profile"
   role = aws_iam_role.ecs_iam_role.name
+  // waiting for others
+  // https://stackoverflow.com/questions/36802681/terraform-having-timing-issues-launching-ec2-instance-with-instance-profile
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
 }
 
 // step 2: create autoscaling group
