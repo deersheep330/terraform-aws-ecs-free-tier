@@ -49,8 +49,23 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_subnet" "public_subnet" {
   vpc_id = aws_vpc.vpc.id
   cidr_block = "10.0.1.0/24"
+  availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf-prod-public-subnet"
+  }
+}
+
+// for aws_db_subnet_group, we have to create at least two subnets
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = data.aws_availability_zones.available.names[1]
+  tags = {
+    Name = "tf-prod-public-subnet-2"
   }
 }
 
@@ -205,7 +220,7 @@ resource "aws_security_group" "lb_sg" {
 // database-related
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  subnet_ids = [ aws_subnet.public_subnet.id ]
+  subnet_ids = [ aws_subnet.public_subnet.id, aws_subnet.public_subnet_2.id ]
 }
 
 /*
