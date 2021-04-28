@@ -305,6 +305,8 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
               #!/bin/bash
               echo ECS_CLUSTER=var.ecs_cluster_name >> /etc/ecs/ecs.config
               EOF
+
+  key_name = "automation-aws"
 }
 
 resource "aws_autoscaling_group" "ecs_autoscaling_group" {
