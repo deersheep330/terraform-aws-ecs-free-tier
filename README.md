@@ -33,11 +33,13 @@
 
 (2) create aws s3 bucket manually then modify the bucket value in main.tf file
 
-(3) export environment variables
+(3) change variable "ecs_cluster_name" to the value you want
+
+(4) export environment variables
 export AWS_ACCESS_KEY_ID="your-access-key-id"
 export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
 export AWS_REGION="us-east-2"
 
-(4) terraform init
+(5) terraform init
 
-(5) terraform plan
+(6) terraform plan
