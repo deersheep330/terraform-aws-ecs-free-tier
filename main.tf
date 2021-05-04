@@ -1,7 +1,10 @@
 terraform {
-  backend "s3" {
-    bucket = "deerpark-terraform-state-prod"
-    key = "network/terraform.tfstate"
+  backend "remote" {
+    hostname = "app.terraform.io"
+    organization = "deerpark"
+    workspaces {
+      name = "terraform-aws-ecs-free-tier"
+    }
   }
 }
 
