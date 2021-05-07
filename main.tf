@@ -326,3 +326,49 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = var.ecs_cluster_name
 }
+
+// [6] iam role for task definition use
+
+// task role:
+
+data "aws_iam_policy_document" "task_role_iam_policy_document" {
+  statement {
+    actions = [ "sts:AssumeRole" ]
+    principals {
+      type = "Service"
+      identifiers = [ "ecs-tasks.amazonaws.com" ]
+    }
+  }
+}
+
+resource "aws_iam_role" "task_role_iam_role" {
+  name = "${var.name_prefix}-task-role-iam-role"
+  assume_role_policy = data.aws_iam_policy_document.task_role_iam_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "task_role_iam_role_policy_attachment" {
+  role = aws_iam_role.task_role_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+// task execution role
+
+data "aws_iam_policy_document" "task_execution_role_iam_policy_document" {
+  statement {
+    actions = [ "sts:AssumeRole" ]
+    principals {
+      type = "Service"
+      identifiers = [ "ecs-tasks.amazonaws.com" ]
+    }
+  }
+}
+
+resource "aws_iam_role" "task_execution_role_iam_role" {
+  name = "${var.name_prefix}-task-execution-role-iam-role"
+  assume_role_policy = data.aws_iam_policy_document.task_execution_role_iam_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "task_execution_role_iam_role_policy_attachment" {
+  role = aws_iam_role.task_execution_role_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
