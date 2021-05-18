@@ -290,7 +290,7 @@ resource "aws_ssm_parameter" "cloudwatch_agent_config" {
 }
 
 data "template_file" "userdata" {
-  template = file("${path.module}/launch_configuration-userdata.sh.tpl")
+  template = file("${path.module}/launch-configuration-userdata.sh.tpl")
   vars = {
     cloudwatch_agent_config = aws_ssm_parameter.cloudwatch_agent_config.name
     ecs_cluster_name = var.ecs_cluster_name
