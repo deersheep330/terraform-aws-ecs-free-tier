@@ -279,6 +279,24 @@ resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
 
 // step 2: create autoscaling group
 
+data "local_file" "cloudwatch_agent_config_file" {
+  filename = "amazon-cloudwatch-agent.json"
+}
+
+resource "aws_ssm_parameter" "cloudwatch_agent_config" {
+  name  = "cloudwatch-agent-config"
+  type  = "String"
+  value = data.local_file.cloudwatch_agent_config_file.content
+}
+
+data "template_file" "userdata" {
+  template = file("${path.module}/launch_configuration-userdata.sh.tpl")
+  vars = {
+    cloudwatch_agent_config = aws_ssm_parameter.cloudwatch_agent_config.name
+    ecs_cluster_name = var.ecs_cluster_name
+  }
+}
+
 resource "aws_launch_configuration" "ecs_launch_configuration" {
   name = "${var.name_prefix}-ecs-launch-configuration"
   image_id = "ami-09f644e1caad2d877"
@@ -291,10 +309,7 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
 
   security_groups = [ aws_security_group.ecs_sg.id ]
   associate_public_ip_address = true
-  user_data = <<EOF
-              #!/bin/bash
-              echo ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config
-              EOF
+  user_data = data.template_file.userdata.rendered
 
   key_name = "automation-aws"
 }
