@@ -260,9 +260,45 @@ resource "aws_iam_role" "ecs_iam_role" {
   assume_role_policy = data.aws_iam_policy_document.ecs_iam_policy_document.json
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment" {
+// attach managed policy to the created role
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment_ecs" {
   role = aws_iam_role.ecs_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+// attach managed policy to the created role
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment_ssm" {
+  role = aws_iam_role.ecs_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+// attach managed policy to the created role
+
+resource "aws_iam_role_policy_attachment" "ecs_iam_role_policy_attachment_cw_agent" {
+  role = aws_iam_role.ecs_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+// attach inline policy to the created role
+
+resource "aws_iam_role_policy" "ecs_iam_role_policy_ssm" {
+  role = aws_iam_role.ecs_iam_role.name
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "ssm:GetParameter"
+          ],
+          "Resource" : "*"
+        }
+      ]
+    }
+  )
 }
 
 // Use an instance profile to pass an IAM role to an EC2 instance.
@@ -288,6 +324,9 @@ resource "aws_ssm_parameter" "cloudwatch_agent_config" {
   type  = "String"
   value = data.local_file.cloudwatch_agent_config_file.content
   overwrite = true
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
 }
 
 data "template_file" "userdata" {
