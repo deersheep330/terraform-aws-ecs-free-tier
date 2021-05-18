@@ -1,4 +1,6 @@
 #!/bin/bash
+sudo timedatectl set-timezone Asia/Taipei
+
 sudo yum -y install wget
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
 sudo rpm -U ./amazon-cloudwatch-agent.rpm
