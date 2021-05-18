@@ -287,6 +287,7 @@ resource "aws_ssm_parameter" "cloudwatch_agent_config" {
   name  = "cloudwatch-agent-config"
   type  = "String"
   value = data.local_file.cloudwatch_agent_config_file.content
+  overwrite = true
 }
 
 data "template_file" "userdata" {
@@ -312,6 +313,8 @@ resource "aws_launch_configuration" "ecs_launch_configuration" {
   user_data = data.template_file.userdata.rendered
 
   key_name = "automation-aws"
+
+  depends_on = [ aws_ssm_parameter.cloudwatch_agent_config ]
 }
 
 resource "aws_autoscaling_group" "ecs_autoscaling_group" {
