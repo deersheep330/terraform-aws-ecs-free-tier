@@ -9,6 +9,12 @@
             "Sid": "Stmt1482712489000",
             "Effect": "Allow",
             "Action": [
+                "ssm:PutParameter",
+                "ssm:GetParameter",
+                "ssm:DescribeParameters",
+                "ssm:GetParameters",
+                "ssm:DeleteParameter",
+                "ssm:ListTagsForResource",
                 "iam:CreateRole",
                 "iam:GetRole",
                 "iam:PassRole",
@@ -18,11 +24,16 @@
                 "iam:DeleteRole",
                 "iam:AttachRolePolicy",
                 "iam:DetachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:GetRolePolicy",
+                "iam:DeleteRolePolicy",
                 "iam:GetInstanceProfile",
                 "iam:CreateInstanceProfile",
                 "iam:DeleteInstanceProfile",
                 "iam:AddRoleToInstanceProfile",
-                "iam:RemoveRoleFromInstanceProfile"
+                "iam:RemoveRoleFromInstanceProfile",
+                "logs:ListTagsLogGroup",
+                "logs:DeleteLogGroup"
             ],
             "Resource": [
                 "*"
