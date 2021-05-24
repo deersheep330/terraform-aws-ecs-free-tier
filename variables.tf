@@ -9,3 +9,9 @@ variable "name_prefix" {
   type = string
   default = "deerpark"
 }
+
+variable "ecr_repos" {
+  description = "List of ecr repositories to be created"
+  type = list(string)
+  default = [ "rent", "stock" ]
+}
