@@ -31,6 +31,9 @@ workflows:
 
       - hold-apply:
           type: approval
+          filters:
+            branches:
+              only: master
           requires:
             - terraform/plan
 
