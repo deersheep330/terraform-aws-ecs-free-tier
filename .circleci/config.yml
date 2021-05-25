@@ -22,14 +22,21 @@ workflows:
 
       - terraform/plan:
           checkout: true
+          persist-workspace: true
           context:
             - AWS_CONFIG
             - TERRAFORM_CONFIG
           requires:
             - terraform/validate
-            
+
+      - hold-apply:
+          type: approval
+          requires:
+            - terraform/plan
+
       - terraform/apply:
           checkout: true
+          attach-workspace: true
           context:
             - AWS_CONFIG
             - TERRAFORM_CONFIG
@@ -37,5 +44,5 @@ workflows:
             branches:
               only: master
           requires:
-            - terraform/plan
+            - hold-apply
     
