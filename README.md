@@ -43,7 +43,8 @@ It will setup:
                 "iam:AddRoleToInstanceProfile",
                 "iam:RemoveRoleFromInstanceProfile",
                 "logs:ListTagsLogGroup",
-                "logs:DeleteLogGroup"
+                "logs:DeleteLogGroup",
+                "logs:PutRetentionPolicy"
             ],
             "Resource": [
                 "*"
