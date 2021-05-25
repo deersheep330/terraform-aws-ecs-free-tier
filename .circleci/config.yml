@@ -6,8 +6,36 @@ orbs:
 workflows:
   deploy_infrastructure:
     jobs:
+      - terraform/init:
+          checkout: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+
       - terraform/validate:
           checkout: true
           context:
             - AWS_CONFIG
             - TERRAFORM_CONFIG
+          requires:
+            - terraform/init
+
+      - terraform/plan:
+          checkout: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+          requires:
+            - terraform/validate
+            
+      - terraform/apply:
+          checkout: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+          filters:
+            branches:
+              only: master
+          requires:
+            - terraform/plan
+    
