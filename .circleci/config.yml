@@ -1,0 +1,48 @@
+version: 2.1
+
+orbs:
+  terraform: circleci/terraform@2.1.0
+
+workflows:
+  deploy_infrastructure:
+    jobs:
+      - terraform/init:
+          checkout: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+
+      - terraform/validate:
+          checkout: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+          requires:
+            - terraform/init
+
+      - terraform/plan:
+          checkout: true
+          persist-workspace: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+          requires:
+            - terraform/validate
+
+      - hold-apply:
+          type: approval
+          requires:
+            - terraform/plan
+
+      - terraform/apply:
+          checkout: true
+          attach-workspace: true
+          context:
+            - AWS_CONFIG
+            - TERRAFORM_CONFIG
+          filters:
+            branches:
+              only: master
+          requires:
+            - hold-apply
+    
