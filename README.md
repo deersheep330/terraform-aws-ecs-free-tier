@@ -1,4 +1,4 @@
-# terraform-aws-ecs-free-tier
+# terraform-aws-ecs-free-tier [![CircleCI](https://circleci.com/gh/deersheep330/terraform-aws-ecs-free-tier.svg?style=shield)](https://app.circleci.com/pipelines/github/deersheep330/terraform-aws-ecs-free-tier)
 
 (1) create iam role for terraform cli or terraform cloud: the following roles are required:
 
