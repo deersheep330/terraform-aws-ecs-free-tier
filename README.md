@@ -55,11 +55,11 @@ It will setup:
 ```
 #### (2) create aws s3 bucket manually then modify the bucket value in main.tf file
 
-#### (3) change variable "ecs_cluster_name" to the value you want
+#### (3) set variable "ecs_cluster_name". it would be the name of created ecs cluster.
 
-#### (4) change variable "name_prefix" to the value you want
+#### (4) set variable "name_prefix". all resources created by terraform would have this name prefix.
 
-#### (5) change variable "ecr_repos" to the value you want
+#### (5) set variable "ecr_repos". list of ecr repositories to be created.
 
 #### (6) export environment variables
 ```
@@ -68,3 +68,5 @@ export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
 export AWS_REGION="us-east-2"
 ```
 #### (7) terraform init => terraform plan => terraform apply
+
+#### (8) the following values would be output: ecs_cluster_id, rds_connection_url, task_role and task_execution_role, you can use them in your application project.
