@@ -140,13 +140,13 @@ resource "aws_security_group" "ecs_sg" {
 }
 
 resource "aws_launch_configuration" "ecs_launch_configuration" {
-  name = "${var.name_prefix}-ecs-launch-configuration"
+  name_prefix = var.name_prefix
   image_id = "ami-09f644e1caad2d877"
   instance_type = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.ecs_iam_instance_profile.id
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 
   security_groups = [ aws_security_group.ecs_sg.id ]
