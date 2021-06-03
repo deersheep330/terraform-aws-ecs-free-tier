@@ -79,7 +79,7 @@ resource "aws_iam_instance_profile" "ecs_iam_instance_profile" {
 // [B-1] cloudwatch agent config
 
 data "local_file" "cloudwatch_agent_config_file" {
-  filename = "${path.module}/amazon-cloudwatch-agent.json"
+  filename = "${path.module}/amazon-cloudwatch-agent-lightweight.json"
 }
 
 // [B-2] store the cloudwatch config in ssm parameter
