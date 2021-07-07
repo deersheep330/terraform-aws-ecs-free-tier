@@ -118,11 +118,22 @@ resource "aws_security_group" "ecs_sg" {
     to_port = 80
     protocol = "tcp"
   }
+
+  // open ssh port for debug, should be removed later
   
   ingress {
     cidr_blocks = [ "0.0.0.0/0" ]
     from_port = 22
     to_port = 22
+    protocol = "tcp"
+  }
+
+  // opne 8000 port for demo, should be removed later
+
+  ingress {
+    cidr_blocks = [ "0.0.0.0/0" ]
+    from_port = 8000
+    to_port = 8000
     protocol = "tcp"
   }
 
