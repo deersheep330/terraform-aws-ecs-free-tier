@@ -198,3 +198,71 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = var.ecs_cluster_name
 }
+
+// [C] load balancer
+
+// [C-1] application load balancer
+
+resource "aws_s3_bucket" "ecs_alb_log_bucket" {
+  bucket = "${var.name_prefix}-ecs-alb-log-bucket"
+  acl = "log-delivery-write"
+}
+
+resource "aws_alb" "ecs_alb" {
+  name = "${var.name_prefix}-ecs-alb"
+  security_groups = [ aws_security_group.ecs_sg.id ]
+  subnets = "${var.subnets.*.id}"
+
+  access_logs {
+    bucket = aws_s3_bucket.ecs_alb_log_bucket.bucket
+    prefix = "${var.name_prefix}-ecs-alb"
+    enabled = true
+  }
+
+  tags = {
+    Name = "${var.name_prefix}-ecs-alb"
+  }
+}
+
+// [C-2] web frontend http 80 target group
+
+resource "aws_alb_target_group" "ecs_web_target_group" {
+  name = "${var.name_prefix}-ecs-web-target-group"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = var.vpc.id
+  stickiness {
+    type = "lb_cookie"
+  }
+  # Alter the destination of the health check to be the login page.
+  health_check {
+    path = "/"
+    port = 80
+  }
+}
+
+resource "aws_alb_listener" "ecs_web_listener" {
+  load_balancer_arn = "${aws_alb.ecs_alb.arn}"
+  port = "80"
+  protocol = "HTTP"
+
+  default_action {
+    target_group_arn = "${aws_alb_target_group.ecs_web_target_group.arn}"
+    type = "forward"
+  }
+}
+
+// add https later if we have certificate
+
+// resource "aws_alb_listener" "ecs_https_web_listener" {
+//   load_balancer_arn = "${aws_alb.ecs_alb.arn}"
+//   port = "443"
+//   protocol = "HTTPS"
+//   ssl_policy = "ELBSecurityPolicy-2016-08"
+//   certificate_arn = "${var.certificate_arn}"
+//   default_action {
+//     target_group_arn = "${aws_alb_target_group.ecs_web_target_group.arn}"
+//     type = "forward"
+//   }
+// }
+
