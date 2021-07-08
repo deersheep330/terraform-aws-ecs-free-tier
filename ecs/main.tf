@@ -203,9 +203,33 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 // [C-1] application load balancer
 
+data "aws_elb_service_account" "ecs_elb_service_account" {}
+
 resource "aws_s3_bucket" "ecs_alb_log_bucket" {
   bucket = "${var.name_prefix}-ecs-alb-log-bucket"
   acl = "log-delivery-write"
+
+  policy = <<POLICY
+  {
+    "Id": "Policy",
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": [
+          "s3:PutObject"
+        ],
+        "Effect": "Allow",
+        "Resource": "arn:aws:s3:::${var.name_prefix}-ecs-alb-log-bucket/AWSLogs/*",
+        "Principal": {
+          "AWS": [
+            "${data.aws_elb_service_account.ecs_elb_service_account.arn}"
+          ]
+        }
+      }
+    ]
+  }
+  POLICY
+
 }
 
 resource "aws_alb" "ecs_alb" {
