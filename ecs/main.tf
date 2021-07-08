@@ -203,33 +203,67 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 // [C-1] application load balancer
 
-data "aws_elb_service_account" "ecs_elb_service_account" {}
+data "aws_elb_service_account" "ecs_alb_service_account" {}
 
 resource "aws_s3_bucket" "ecs_alb_log_bucket" {
   bucket = "${var.name_prefix}-ecs-alb-log-bucket"
   acl = "log-delivery-write"
+  force_destroy = true
+}
 
-  policy = <<POLICY
-  {
-    "Id": "Policy",
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": [
-          "s3:PutObject"
-        ],
-        "Effect": "Allow",
-        "Resource": "arn:aws:s3:::${var.name_prefix}-ecs-alb-log-bucket/AWSLogs/*",
-        "Principal": {
-          "AWS": [
-            "${data.aws_elb_service_account.ecs_elb_service_account.arn}"
-          ]
-        }
-      }
+resource "aws_s3_bucket_policy" "ecs_alb_log_bucket_policy" {
+  bucket = aws_s3_bucket.ecs_alb_log_bucket.id
+  policy = data.aws_iam_policy_document.ecs_alb_log_bucket_policy_document.json
+}
+
+data "aws_iam_policy_document" "ecs_alb_log_bucket_policy_document" {
+
+  policy_id = "ecs_alb_log_bucket_policy"
+
+  statement {
+
+    actions = [
+      "s3:PutObject",
     ]
-  }
-  POLICY
+    effect = "Allow"
+    resources = [
+      "${aws_s3_bucket.ecs_alb_log_bucket.arn}/*",
+    ]
 
+    principals {
+      identifiers = [ "${data.aws_elb_service_account.ecs_alb_service_account.arn}" ]
+      type = "AWS"
+    }
+  }
+
+  statement {
+
+    actions = [
+      "s3:PutObject"
+    ]
+    effect = "Allow"
+    resources = [ "${aws_s3_bucket.ecs_alb_log_bucket.arn}/*" ]
+
+    principals {
+      identifiers = [ "delivery.logs.amazonaws.com" ]
+      type = "Service"
+    }
+  }
+
+
+  statement {
+
+    actions = [
+      "s3:GetBucketAcl"
+    ]
+    effect = "Allow"
+    resources = [ "${aws_s3_bucket.ecs_alb_log_bucket.arn}" ]
+
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type = "Service"
+    }
+  }
 }
 
 resource "aws_alb" "ecs_alb" {
@@ -250,8 +284,8 @@ resource "aws_alb" "ecs_alb" {
 
 // [C-2] web frontend http 80 target group
 
-resource "aws_alb_target_group" "ecs_web_target_group" {
-  name = "${var.name_prefix}-ecs-web-target-group"
+resource "aws_alb_target_group" "ecs_alb_target_group" {
+  name = "${var.name_prefix}-ecs-alb-target-group"
   port = 80
   protocol = "HTTP"
   vpc_id = var.vpc.id
@@ -265,27 +299,32 @@ resource "aws_alb_target_group" "ecs_web_target_group" {
   }
 }
 
-resource "aws_alb_listener" "ecs_web_listener" {
+resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment" {
+  alb_target_group_arn = aws_alb_target_group.ecs_alb_target_group.arn
+  autoscaling_group_name = aws_autoscaling_group.ecs_autoscaling_group.id
+}
+
+resource "aws_alb_listener" "ecs_alb_listener" {
   load_balancer_arn = "${aws_alb.ecs_alb.arn}"
   port = "80"
   protocol = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.ecs_web_target_group.arn}"
+    target_group_arn = "${aws_alb_target_group.ecs_alb_target_group.arn}"
     type = "forward"
   }
 }
 
 // add https later if we have certificate
 
-// resource "aws_alb_listener" "ecs_https_web_listener" {
+// resource "aws_alb_listener" "ecs_https_alb_listener" {
 //   load_balancer_arn = "${aws_alb.ecs_alb.arn}"
 //   port = "443"
 //   protocol = "HTTPS"
 //   ssl_policy = "ELBSecurityPolicy-2016-08"
 //   certificate_arn = "${var.certificate_arn}"
 //   default_action {
-//     target_group_arn = "${aws_alb_target_group.ecs_web_target_group.arn}"
+//     target_group_arn = "${aws_alb_target_group.ecs_https_alb_target_group.arn}"
 //     type = "forward"
 //   }
 // }

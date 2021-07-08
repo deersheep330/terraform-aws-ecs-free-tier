@@ -18,3 +18,8 @@ output "task_execution_role" {
   description = "task execution role for execution_role_arn of aws_ecs_task_definition"
   value = module.task_execution_role.task_execution_role
 }
+
+output "alb_dns_name" {
+  description = "alb dns name for accessing web frontend"
+  value = module.ecs.alb_dns_name
+}
