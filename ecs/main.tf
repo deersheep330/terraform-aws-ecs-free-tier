@@ -231,7 +231,7 @@ data "aws_iam_policy_document" "ecs_alb_log_bucket_policy_document" {
     ]
 
     principals {
-      identifiers = [ "${data.aws_elb_service_account.ecs_alb_service_account.arn}" ]
+      identifiers = [ data.aws_elb_service_account.ecs_alb_service_account.arn ]
       type = "AWS"
     }
   }
