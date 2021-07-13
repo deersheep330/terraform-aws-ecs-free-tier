@@ -257,7 +257,7 @@ data "aws_iam_policy_document" "ecs_alb_log_bucket_policy_document" {
       "s3:GetBucketAcl"
     ]
     effect = "Allow"
-    resources = [ "${aws_s3_bucket.ecs_alb_log_bucket.arn}" ]
+    resources = [ aws_s3_bucket.ecs_alb_log_bucket.arn ]
 
     principals {
       identifiers = ["delivery.logs.amazonaws.com"]
@@ -292,7 +292,6 @@ resource "aws_alb_target_group" "ecs_alb_target_group" {
   stickiness {
     type = "lb_cookie"
   }
-  # Alter the destination of the health check to be the login page.
   health_check {
     path = "/"
     port = 80
@@ -301,6 +300,25 @@ resource "aws_alb_target_group" "ecs_alb_target_group" {
 
 resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment" {
   alb_target_group_arn = aws_alb_target_group.ecs_alb_target_group.arn
+  autoscaling_group_name = aws_autoscaling_group.ecs_autoscaling_group.id
+}
+
+resource "aws_alb_target_group" "ecs_alb_target_group_8000" {
+  name = "${var.name_prefix}-target-group-8000"
+  port = 8000
+  protocol = "HTTP"
+  vpc_id = var.vpc.id
+  stickiness {
+    type = "lb_cookie"
+  }
+  health_check {
+    path = "/api/health_check"
+    port = 8000
+  }
+}
+
+resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment_8000" {
+  alb_target_group_arn = aws_alb_target_group.ecs_alb_target_group_8000.arn
   autoscaling_group_name = aws_autoscaling_group.ecs_autoscaling_group.id
 }
 
@@ -315,6 +333,22 @@ resource "aws_alb_listener" "ecs_alb_listener" {
   }
 }
 
+resource "aws_alb_listener_rule" "ecs_alb_listener_rule_8000" {
+  listener_arn = aws_alb_listener.ecs_alb_listener.arn
+
+  action {
+    type = "forward"
+    target_group_arn = aws_alb_target_group.ecs_alb_target_group_8000.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}
+
+
 // add https later if we have certificate
 
 // resource "aws_alb_listener" "ecs_https_alb_listener" {
@@ -328,4 +362,3 @@ resource "aws_alb_listener" "ecs_alb_listener" {
 //     type = "forward"
 //   }
 // }
-
