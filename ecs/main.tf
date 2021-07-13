@@ -303,17 +303,17 @@ resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment" {
   autoscaling_group_name = aws_autoscaling_group.ecs_autoscaling_group.id
 }
 
-resource "aws_alb_target_group" "ecs_alb_target_group_8080" {
-  name = "${var.name_prefix}-target-group-8080"
-  port = 8080
+resource "aws_alb_target_group" "ecs_alb_target_group_8000" {
+  name = "${var.name_prefix}-target-group-8000"
+  port = 8000
   protocol = "HTTP"
   vpc_id = var.vpc.id
   stickiness {
     type = "lb_cookie"
   }
   health_check {
-    path = "/health_check"
-    port = 8080
+    path = "/api/health_check"
+    port = 8000
   }
 }
 
@@ -333,12 +333,12 @@ resource "aws_alb_listener" "ecs_alb_listener" {
   }
 }
 
-resource "aws_alb_listener_rule" "ecs_alb_listener_rule_8080" {
+resource "aws_alb_listener_rule" "ecs_alb_listener_rule_8000" {
   listener_arn = aws_alb_listener.ecs_alb_listener.arn
 
   action {
     type = "forward"
-    target_group_arn = aws_alb_target_group.ecs_alb_target_group_8080.arn
+    target_group_arn = aws_alb_target_group.ecs_alb_target_group_8000.arn
   }
 
   condition {
