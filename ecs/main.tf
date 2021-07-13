@@ -257,7 +257,7 @@ data "aws_iam_policy_document" "ecs_alb_log_bucket_policy_document" {
       "s3:GetBucketAcl"
     ]
     effect = "Allow"
-    resources = [ "${aws_s3_bucket.ecs_alb_log_bucket.arn}" ]
+    resources = [ aws_s3_bucket.ecs_alb_log_bucket.arn ]
 
     principals {
       identifiers = ["delivery.logs.amazonaws.com"]
@@ -317,8 +317,8 @@ resource "aws_alb_target_group" "ecs_alb_target_group_8000" {
   }
 }
 
-resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment_8080" {
-  alb_target_group_arn = aws_alb_target_group.ecs_alb_target_group_8080.arn
+resource "aws_autoscaling_attachment" "ecs_alb_autoscaling_attachment_8000" {
+  alb_target_group_arn = aws_alb_target_group.ecs_alb_target_group_8000.arn
   autoscaling_group_name = aws_autoscaling_group.ecs_autoscaling_group.id
 }
 
