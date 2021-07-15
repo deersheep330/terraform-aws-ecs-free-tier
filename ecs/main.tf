@@ -293,6 +293,7 @@ resource "aws_alb_target_group" "ecs_alb_target_group" {
     type = "lb_cookie"
   }
   health_check {
+    interval = 300
     path = "/"
     port = 80
   }
@@ -312,6 +313,7 @@ resource "aws_alb_target_group" "ecs_alb_target_group_8000" {
     type = "lb_cookie"
   }
   health_check {
+    interval = 300
     path = "/api/health_check"
     port = 8000
   }
