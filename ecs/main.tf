@@ -180,6 +180,14 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
   min_size = 1
   max_size = 1
 
+  // prevent registed target in alb target group being removed
+  // visit links below for more details:
+  // https://github.com/hashicorp/terraform-provider-aws/issues/9513
+  // https://github.com/hashicorp/terraform-provider-aws/issues/14540
+  lifecycle {
+    ignore_changes = [load_balancers, target_group_arns]
+  }
+
   tag {
     key = "Name"
     value = "${var.name_prefix}-autoscaled-ec2"
