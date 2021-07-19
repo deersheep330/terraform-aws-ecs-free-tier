@@ -23,6 +23,7 @@ module "rds" {
 module "redis" {
   source = "./redis"
   name_prefix = var.name_prefix
+  vpc = module.vpc.vpc
   subnets = module.vpc.subnets
 }
 
