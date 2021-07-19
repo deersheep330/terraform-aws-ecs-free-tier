@@ -3,6 +3,10 @@ variable "name_prefix" {
   type = string
 }
 
+variable "vpc" {
+  description = "vpc generated from vpc module"
+}
+
 variable "subnets" {
   description = "subnets generated from vpc module"
 }
