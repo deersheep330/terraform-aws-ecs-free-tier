@@ -20,6 +20,12 @@ module "rds" {
   subnets = module.vpc.subnets
 }
 
+module "redis" {
+  source = "./redis"
+  name_prefix = var.name_prefix
+  subnets = module.vpc.subnets
+}
+
 module "ecs" {
   source = "./ecs"
   name_prefix = var.name_prefix
