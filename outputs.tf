@@ -9,6 +9,12 @@ output "rds_connection_url" {
   sensitive = true
 }
 
+output "redis_host" {
+  description = "redis host"
+  value = module.redis.redis_host
+  sensitive = true
+}
+
 output "task_role" {
   description = "task role for task_role_arn of aws_ecs_task_definition"
   value = module.task_execution_role.task_role

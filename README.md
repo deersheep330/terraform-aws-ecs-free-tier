@@ -42,9 +42,18 @@ It will setup:
                 "iam:DeleteInstanceProfile",
                 "iam:AddRoleToInstanceProfile",
                 "iam:RemoveRoleFromInstanceProfile",
+                "iam:CreateServiceLinkedRole",
                 "logs:ListTagsLogGroup",
                 "logs:DeleteLogGroup",
-                "logs:PutRetentionPolicy"
+                "logs:PutRetentionPolicy",
+                "elasticache:CreateCacheSubnetGroup",
+                "elasticache:CreateCacheCluster",
+                "elasticache:AddTagsToResource",
+                "elasticache:DescribeCacheSubnetGroups",
+                "elasticache:DescribeCacheClusters",
+                "elasticache:ListTagsForResource",
+                "elasticache:DeleteCacheSubnetGroup",
+                "elasticache:DeleteCacheCluster"
             ],
             "Resource": [
                 "*"
