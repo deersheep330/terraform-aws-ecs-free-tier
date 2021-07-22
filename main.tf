@@ -34,6 +34,8 @@ module "ecs" {
   subnets = module.vpc.subnets
   ecs_cluster_name = var.ecs_cluster_name
   certificate_arn = var.certificate_arn
+  domain_name = var.domain_name
+  subdomain_url = var.subdomain_url
 }
 
 module "task_execution_role" {
