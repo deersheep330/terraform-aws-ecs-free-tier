@@ -15,3 +15,8 @@ variable "ecs_cluster_name" {
   description = "Name of the ECS cluster to be created"
   type = string
 }
+
+variable "certificate_arn" {
+  description = "the aws acm certificate arn created from AWS Certificate Manager"
+  type = string
+}
