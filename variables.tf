@@ -21,3 +21,15 @@ variable "certificate_arn" {
   type = string
   default = "arn:aws:acm:us-east-2:696324379330:certificate/1e9e7e02-e7ad-4de8-a2ac-342ce74f0108"
 }
+
+variable "domain_name" {
+  description = "the domain name you purchased should be registered as a route 53 hosted zone"
+  type = string
+  default = "deer.solutions"
+}
+
+variable "subdomain_url" {
+  description = "the subdomain url you'd like redirect to application load banacer"
+  type = string
+  default = "trends.deer.solutions"
+}

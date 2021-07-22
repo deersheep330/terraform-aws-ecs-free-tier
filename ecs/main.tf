@@ -297,7 +297,7 @@ resource "aws_alb" "ecs_alb" {
   }
 }
 
-// [C-2] web frontend http 80 target group
+// [C-2] web frontend http 80
 
 resource "aws_alb_target_group" "ecs_alb_target_group" {
   name = "${var.name_prefix}-ecs-alb-target-group"
@@ -365,7 +365,7 @@ resource "aws_alb_listener_rule" "ecs_alb_listener_rule_8000" {
   }
 }
 
-// add https later if we have certificate
+// [C-3] web frontend https 443
 
 resource "aws_alb_listener" "ecs_https_alb_listener" {
   load_balancer_arn = aws_alb.ecs_alb.arn
@@ -392,4 +392,23 @@ resource "aws_alb_listener_rule" "ecs_https_alb_listener_rule_8000" {
       values = ["/api/*"]
     }
   }
+}
+
+// [E] route 53  - dns
+
+resource "aws_route53_zone" "hosted_zone" {
+  name = var.domain_name
+}
+
+resource "aws_route53_record" "recourd" {
+  zone_id = aws_route53_zone.hosted_zone.zone_id
+  name = var.subdomain_url
+  type = "A"
+
+  alias {
+    name = aws_alb.ecs_alb.dns_name
+    zone_id = aws_alb.ecs_alb.zone_id
+    evaluate_target_health = true
+  }
+
 }

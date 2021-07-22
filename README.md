@@ -72,12 +72,14 @@ It will setup:
 
 #### (6) set variable "certificate_arn". you have to create a ssl certificate for your purchased domain name and validate the ssl certificate from AWS Certificate Maneger by yourself and then get a certificate arn value
 
-#### (7) export environment variables
+#### (7) set variables "domain_name" and "subdomain_url".
+
+#### (8) export environment variables
 ```
 export AWS_ACCESS_KEY_ID="your-access-key-id"
 export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
 export AWS_REGION="us-east-2"
 ```
-#### (8) terraform init => terraform plan => terraform apply
+#### (9) terraform init => terraform plan => terraform apply
 
-#### (9) the following values would be output: ecs_cluster_id, rds_connection_url, task_role and task_execution_role, you can use them in your application project.
+#### (10) the following values would be output: ecs_cluster_id, rds_connection_url, task_role and task_execution_role, you can use them in your application project.

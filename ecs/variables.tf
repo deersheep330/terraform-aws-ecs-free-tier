@@ -20,3 +20,13 @@ variable "certificate_arn" {
   description = "the aws acm certificate arn created from AWS Certificate Manager"
   type = string
 }
+
+variable "domain_name" {
+  description = "the domain name you purchased should be registered as a route 53 hosted zone"
+  type = string
+}
+
+variable "subdomain_url" {
+  description = "the subdomain url you'd like redirect to application load banacer"
+  type = string
+}
