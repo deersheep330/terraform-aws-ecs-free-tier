@@ -119,6 +119,13 @@ resource "aws_security_group" "ecs_sg" {
     protocol = "tcp"
   }
 
+  ingress {
+    cidr_blocks = [ "0.0.0.0/0" ]
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+  }
+
   // open ssh port for debug, should be removed later
   
   ingress {
@@ -358,17 +365,31 @@ resource "aws_alb_listener_rule" "ecs_alb_listener_rule_8000" {
   }
 }
 
-
 // add https later if we have certificate
 
-// resource "aws_alb_listener" "ecs_https_alb_listener" {
-//   load_balancer_arn = "${aws_alb.ecs_alb.arn}"
-//   port = "443"
-//   protocol = "HTTPS"
-//   ssl_policy = "ELBSecurityPolicy-2016-08"
-//   certificate_arn = "${var.certificate_arn}"
-//   default_action {
-//     target_group_arn = "${aws_alb_target_group.ecs_https_alb_target_group.arn}"
-//     type = "forward"
-//   }
-// }
+resource "aws_alb_listener" "ecs_https_alb_listener" {
+  load_balancer_arn = aws_alb.ecs_alb.arn
+  port = "443"
+  protocol = "HTTPS"
+  ssl_policy = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.certificate_arn
+  default_action {
+    target_group_arn = aws_alb_target_group.ecs_alb_target_group.arn
+    type = "forward"
+  }
+}
+
+resource "aws_alb_listener_rule" "ecs_https_alb_listener_rule_8000" {
+  listener_arn = aws_alb_listener.ecs_https_alb_listener.arn
+
+  action {
+    type = "forward"
+    target_group_arn = aws_alb_target_group.ecs_alb_target_group_8000.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}
