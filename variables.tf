@@ -13,7 +13,7 @@ variable "ecs_cluster_name" {
 variable "ecr_repos" {
   description = "List of ecr repositories to be created"
   type = list(string)
-  default = [ "rent", "stock", "booking", "stock-frontend" ]
+  default = [ "rent", "stock", "stock-frontend" ]
 }
 
 variable "certificate_arn" {
